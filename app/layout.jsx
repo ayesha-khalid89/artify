@@ -8,6 +8,9 @@ export const metadata = {
 const layout = ({ children }) => {
   return (
     <html lang="en">
+      <head>
+        <link rel="icon" href="/favicon.ico" />
+      </head>
       <body>
         <Provider>
           <main>{children}</main>
