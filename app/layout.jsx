@@ -1,5 +1,6 @@
 import "@styles/globals.css";
 import Provider from "@components/Provider";
+import Head from 'next/head';
 
 export const metadata = {
   title: "artify",
@@ -8,9 +9,9 @@ export const metadata = {
 const layout = ({ children }) => {
   return (
     <html lang="en">
-      <head>
+      <Head>
         <link rel="icon" href="/favicon.ico" />
-      </head>
+      </Head>
       <body>
         <Provider>
           <main>{children}</main>
