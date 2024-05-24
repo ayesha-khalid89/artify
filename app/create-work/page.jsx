@@ -32,7 +32,7 @@ const CreateWork = () => {
         body: newWorkForm,
       });
       if(response.ok){
-        router.push("/shop")
+        router.push(`/shop?id=${session?.user?._id}`)
       }
     } catch (err) {console.log("Publish work failed",err.message)}
   };

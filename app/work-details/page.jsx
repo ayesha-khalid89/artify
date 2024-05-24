@@ -6,6 +6,7 @@ import {
   ArrowBackIosNew,
   ArrowForwardIos,
   Edit,
+  Favorite,
   FavoriteBorder,
   More,
   ShoppingCart,
@@ -20,7 +21,7 @@ const WorkDetails = () => {
   const [work, setWork] = useState({});
   const searchParams = useSearchParams();
   const workId = searchParams.get("id");
-  const { data: session } = useSession();
+  const { data: session, update } = useSession();
 
   useEffect(() => {
     const getWorkDetails = async () => {
@@ -53,7 +54,57 @@ const WorkDetails = () => {
   const loadMorePhotos = () => {
     setVisiblePhotos(work.workPhotoPaths.length);
   };
-  const router=useRouter()
+  const router = useRouter();
+
+  const wishList = session?.user?.wishList;
+
+  const isLiked = wishList?.find((item) => item?._id === work._id);
+  const patchWishList = async () => {
+    if(!session?.user){
+      return
+    }
+    const response = await fetch(`api/user/${userId}/wishlist/${work._id}`, {
+      method: "PATCH",
+    });
+    const data = await response.json();
+    update({ user: { wishList: data.wishList } });
+  };
+
+  //add to cart
+  const cart = session?.user?.cart;
+
+  const isInCart = cart?.find((item) => item.workId === workId);
+  const addToCart = async () => {
+    const newCartItem = {
+      workId,
+      image: work.workPhotoPaths[0],
+      title: work.title,
+      category: work.category,
+      creator: work.creator,
+      price: work.price,
+      quantity: 1,
+    };
+    if (!isInCart) {
+      const newCart = [...cart, newCartItem];
+      try {
+        await fetch(`/api/user/${userId}/cart`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ cart: newCart }),
+        });
+        update({user:{cart:newCart}})
+      } catch (err) {
+        console.log(err)
+      }
+    }
+    else{
+      confirm("This item is already in cart!")
+      return
+    }
+  };
+
   return loading ? (
     <Loader />
   ) : (
@@ -63,13 +114,22 @@ const WorkDetails = () => {
         <div className="title">
           <h1>{work.title}</h1>
           {work?.creator?._id === userId ? (
-            <div className="save" onClick={()=>{router.push(`/update-work?id=${workId}`)}}>
+            <div
+              className="save"
+              onClick={() => {
+                router.push(`/update-work?id=${workId}`);
+              }}
+            >
               <Edit />
               <p>Edit</p>
             </div>
           ) : (
-            <div className="save">
-              <FavoriteBorder />
+            <div className="save" onClick={patchWishList} >
+              {isLiked ? (
+                <Favorite sx={{ color: "red" }} />
+              ) : (
+                <FavoriteBorder />
+              )}
               <p>Save</p>
             </div>
           )}
@@ -105,36 +165,37 @@ const WorkDetails = () => {
             />
           ))}
           {visiblePhotos < work.workPhotoPaths.length && (
-          <div className="show-more" onClick={loadMorePhotos}>
-            <ArrowForwardIos sx={{ fontSize: "40px" }} />
-            Show More
-          </div>
-        )}
-        {visiblePhotos > 5 && visiblePhotos === work.workPhotoPaths.length && (
-          <div
-            className="show-more"
-            onClick={() => {
-              setVisiblePhotos(5);
-            }}
-          >
-            <ArrowBackIosNew sx={{ fontSize: "40px" }} />
-            Show Less
-          </div>
-        )}
+            <div className="show-more" onClick={loadMorePhotos}>
+              <ArrowForwardIos sx={{ fontSize: "40px" }} />
+              Show More
+            </div>
+          )}
+          {visiblePhotos > 5 &&
+            visiblePhotos === work.workPhotoPaths.length && (
+              <div
+                className="show-more"
+                onClick={() => {
+                  setVisiblePhotos(5);
+                }}
+              >
+                <ArrowBackIosNew sx={{ fontSize: "40px" }} />
+                Show Less
+              </div>
+            )}
         </div>
         <hr />
         <div className="profile">
-            <img src={work.creator.profileImagePath} alt="profile" />
-            <h3>Created by {work.creator.userName}</h3>
+          <img src={work.creator.profileImagePath} alt="profile"  onClick={()=> router.push(`/shop?id=${work.creator._id}`)}/>
+          <h3>Created by {work.creator.userName}</h3>
         </div>
 
         <hr />
         <h3>About this product</h3>
         <p>{work.description}</p>
-        <h1>{work.price}</h1>
-        <button type="submit">
-            <ShoppingCart />
-            Add to Cart
+        <h1>${work.price}</h1>
+        <button type="submit" onClick={addToCart} disabled={!session?.user}>
+          <ShoppingCart />
+          Add to Cart
         </button>
       </div>
     </>

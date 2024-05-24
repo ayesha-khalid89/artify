@@ -65,7 +65,7 @@ const Login = () => {
           <p>Log In with Google</p>
           <FcGoogle />
         </button>
-        <a href="/register">Don't have an account? Sign in here.</a>
+        <a href="/register">Don't have an account? Sign Up here.</a>
       </div>
     </div>
   );

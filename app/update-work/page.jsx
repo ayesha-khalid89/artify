@@ -54,7 +54,7 @@ const UpdateWork = () => {
         body: updateWorkForm,
       });
       if(response.ok){
-        router.push("/shop")
+        router.push(`/shop?id=${session?.user?._id}`)
       }
     } catch (err) {console.log("Update work failed",err.message)}
   };

@@ -45,7 +45,7 @@ export async function POST(req) {
       userName,
       email,
       password: hashedPassword,
-      profileImagePath: `uploads/${file.name}`,
+      profileImagePath: `/uploads/${file.name}`,
     });
 
     //save user

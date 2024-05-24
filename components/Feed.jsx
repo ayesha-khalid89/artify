@@ -19,7 +19,6 @@ const Feed = () => {
       console.log("error in loading worklist");
     }
   };
-  console.log(workList);
 
   useEffect(() => {
     getWorkList();
